@@ -10,7 +10,8 @@ class Settings(BaseSettings):
     
     # OpenAI Configuration
     openai_api_key: str
-    openai_model: str = "gpt-4o"
+    openai_model: str = "openai/gpt-5"
+    openai_base_url: str = "https://imllm.intermesh.net"
     
     # Prometheus Configuration
     prometheus_url: str = "http://prometheus:9090"

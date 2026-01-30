@@ -170,7 +170,10 @@ When you have completed your analysis, use the generate_incident_report tool to 
 
     def __init__(self):
         settings = get_settings()
-        self.client = AsyncOpenAI(api_key=settings.openai_api_key)
+        self.client = AsyncOpenAI(
+            api_key=settings.openai_api_key,
+            base_url=settings.openai_base_url
+        )
         self.model = settings.openai_model
         self.prometheus = PrometheusClient(settings.prometheus_url)
         self.tool_executor = ToolExecutor(self.prometheus)

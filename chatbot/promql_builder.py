@@ -25,7 +25,7 @@ class PromQLBuilder:
         # Connection Metrics
         "active_connections": MetricQuery(
             name="Active Connections",
-            query="pg_stat_activity_count{{state='active'}}",
+            query="pg_stat_activity_count{state='active'}",
             description="Number of active database connections",
             unit="connections",
             threshold_warning=80,
@@ -33,7 +33,7 @@ class PromQLBuilder:
         ),
         "idle_connections": MetricQuery(
             name="Idle Connections",
-            query="pg_stat_activity_count{{state='idle'}}",
+            query="pg_stat_activity_count{state='idle'}",
             description="Number of idle database connections",
             unit="connections"
         ),
@@ -63,13 +63,13 @@ class PromQLBuilder:
         # Transaction Metrics
         "transactions_committed": MetricQuery(
             name="Transactions Committed",
-            query="rate(pg_stat_database_xact_commit{{datname='testdb'}}[5m])",
+            query="rate(pg_stat_database_xact_commit{datname='testdb'}[5m])",
             description="Rate of committed transactions per second",
             unit="tx/s"
         ),
         "transactions_rolled_back": MetricQuery(
             name="Transactions Rolled Back",
-            query="rate(pg_stat_database_xact_rollback{{datname='testdb'}}[5m])",
+            query="rate(pg_stat_database_xact_rollback{datname='testdb'}[5m])",
             description="Rate of rolled back transactions per second",
             unit="tx/s"
         ),
@@ -91,13 +91,13 @@ class PromQLBuilder:
         ),
         "exclusive_locks": MetricQuery(
             name="Exclusive Locks",
-            query="pg_locks_count{{mode='ExclusiveLock'}}",
+            query="pg_locks_count{mode='ExclusiveLock'}",
             description="Number of exclusive locks",
             unit="locks"
         ),
         "waiting_locks": MetricQuery(
             name="Waiting Locks",
-            query="pg_locks_count{{granted='false'}}",
+            query="pg_locks_count{granted='false'}",
             description="Number of locks waiting to be granted",
             unit="locks",
             threshold_warning=5,
@@ -107,7 +107,7 @@ class PromQLBuilder:
         # Buffer/Cache Metrics
         "buffer_cache_hit_ratio": MetricQuery(
             name="Buffer Cache Hit Ratio",
-            query="(pg_stat_database_blks_hit{{datname='testdb'}} / (pg_stat_database_blks_hit{{datname='testdb'}} + pg_stat_database_blks_read{{datname='testdb'}})) * 100",
+            query="(pg_stat_database_blks_hit{datname='testdb'} / (pg_stat_database_blks_hit{datname='testdb'} + pg_stat_database_blks_read{datname='testdb'})) * 100",
             description="Percentage of requests served from buffer cache",
             unit="percent",
             threshold_warning=95,  # Below this is concerning
@@ -115,13 +115,13 @@ class PromQLBuilder:
         ),
         "blocks_read": MetricQuery(
             name="Blocks Read",
-            query="rate(pg_stat_database_blks_read{{datname='testdb'}}[5m])",
+            query="rate(pg_stat_database_blks_read{datname='testdb'}[5m])",
             description="Rate of disk blocks read per second",
             unit="blocks/s"
         ),
         "blocks_hit": MetricQuery(
             name="Blocks Hit",
-            query="rate(pg_stat_database_blks_hit{{datname='testdb'}}[5m])",
+            query="rate(pg_stat_database_blks_hit{datname='testdb'}[5m])",
             description="Rate of buffer cache hits per second",
             unit="blocks/s"
         ),
@@ -151,19 +151,19 @@ class PromQLBuilder:
         # Tuple Metrics
         "rows_inserted": MetricQuery(
             name="Rows Inserted",
-            query="rate(pg_stat_database_tup_inserted{{datname='testdb'}}[5m])",
+            query="rate(pg_stat_database_tup_inserted{datname='testdb'}[5m])",
             description="Rate of rows inserted per second",
             unit="rows/s"
         ),
         "rows_updated": MetricQuery(
             name="Rows Updated",
-            query="rate(pg_stat_database_tup_updated{{datname='testdb'}}[5m])",
+            query="rate(pg_stat_database_tup_updated{datname='testdb'}[5m])",
             description="Rate of rows updated per second",
             unit="rows/s"
         ),
         "rows_deleted": MetricQuery(
             name="Rows Deleted",
-            query="rate(pg_stat_database_tup_deleted{{datname='testdb'}}[5m])",
+            query="rate(pg_stat_database_tup_deleted{datname='testdb'}[5m])",
             description="Rate of rows deleted per second",
             unit="rows/s"
         ),
@@ -189,7 +189,7 @@ class PromQLBuilder:
         # Database Size
         "database_size": MetricQuery(
             name="Database Size",
-            query="pg_database_size_bytes{{datname='testdb'}}",
+            query="pg_database_size_bytes{datname='testdb'}",
             description="Size of the database in bytes",
             unit="bytes"
         ),
