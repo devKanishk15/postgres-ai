@@ -4,8 +4,8 @@ const api = axios.create({
     baseURL: 'http://localhost:8000',
 });
 
-export const chatWithAgent = async (message: string) => {
-    const response = await api.post('/chat', { message });
+export const chatWithAgent = async (message: string, signal?: AbortSignal) => {
+    const response = await api.post('/chat', { message }, { signal });
     return response.data;
 };
 

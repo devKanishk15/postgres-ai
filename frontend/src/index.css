@@ -3,11 +3,13 @@
 @import "tailwindcss/utilities" layer(utilities);
 
 :root {
-  --background: 224 71% 4%;
-  --foreground: 213 31% 91%;
-  --border: 216 34% 17%;
-  --card: 224 71% 4%;
-  --accent: 216 34% 17%;
+  --background: 0 0% 9%;
+  --foreground: 0 0% 93%;
+  --sidebar: 0 0% 0%;
+  --surface: 0 0% 13%;
+  --border: 0 0% 18%;
+  --accent: 0 0% 25%;
+  --user-bubble: 0 0% 15%;
 }
 
 body {
@@ -16,11 +18,94 @@ body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
-.glass {
-  background: rgba(15, 23, 42, 0.6);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+/* Markdown Styling */
+.prose {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+}
+
+.prose h1,
+.prose h2,
+.prose h3 {
+  color: #fff !important;
+  font-weight: 600 !important;
+  margin-top: 1.5rem !important;
+  margin-bottom: 0.75rem !important;
+}
+
+.prose h3 {
+  font-size: 1.125rem !important;
+}
+
+.prose p {
+  margin-bottom: 1rem !important;
+}
+
+.prose code {
+  background: #2f2f2f !important;
+  padding: 0.2rem 0.4rem !important;
+  border-radius: 0.375rem !important;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
+  font-size: 0.875em !important;
+  color: #ececec !important;
+}
+
+.prose pre {
+  background: #0d0d0d !important;
+  padding: 1rem !important;
+  border-radius: 0.5rem !important;
+  overflow-x: auto !important;
+  margin: 1rem 0 !important;
+  border: 1px solid #2f2f2f !important;
+}
+
+.prose pre code {
+  background: transparent !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  font-size: 0.875rem !important;
+}
+
+.prose table {
+  width: 100% !important;
+  border-collapse: collapse !important;
+  margin: 1rem 0 !important;
+  background: #1e1e1e !important;
+  border-radius: 0.5rem !important;
+  overflow: hidden !important;
+  border: 1px solid #2f2f2f !important;
+}
+
+.prose th,
+.prose td {
+  padding: 0.75rem 1rem !important;
+  text-align: left !important;
+  border-bottom: 1px solid #2f2f2f !important;
+}
+
+.prose th {
+  background: #2f2f2f !important;
+  font-weight: 600 !important;
+  color: #fff !important;
+}
+
+.prose tr:last-child td {
+  border-bottom: none !important;
+}
+
+.prose ul,
+.prose ol {
+  margin: 1rem 0 !important;
+  padding-left: 1.5rem !important;
+}
+
+.prose li {
+  margin-bottom: 0.5rem !important;
+}
+
+.prose strong {
+  color: #fff !important;
+  font-weight: 600 !important;
 }
 
 .custom-scrollbar::-webkit-scrollbar {
@@ -32,10 +117,10 @@ body {
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #1e293b;
+  background: #2f2f2f;
   border-radius: 10px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #334155;
+  background: #404040;
 }

@@ -1,12 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Activity, ShieldAlert, Database, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { Database } from 'lucide-react';
 import { getDbHealth } from '../api';
-import { clsx, type ClassValue } from 'clsx';
-import { twMerge } from 'tailwind-merge';
 
-function cn(...inputs: ClassValue[]) {
-    return twMerge(clsx(inputs));
-}
 
 interface HealthData {
     status: string;
@@ -36,17 +31,9 @@ export const Sidebar: React.FC = () => {
         return () => clearInterval(interval);
     }, []);
 
-    const getStatusIcon = (status: string) => {
-        switch (status) {
-            case 'healthy': return <CheckCircle2 className="text-green-400 w-5 h-5" />;
-            case 'warning': return <AlertTriangle className="text-yellow-400 w-5 h-5" />;
-            case 'critical': return <ShieldAlert className="text-red-400 w-5 h-5" />;
-            default: return <Activity className="text-blue-400 w-5 h-5" />;
-        }
-    };
 
     return (
-        <div className="w-80 border-r border-white/10 h-screen flex flex-col glass p-6 overflow-y-auto custom-scrollbar">
+        <div className="w-80 border-r border-[#2f2f2f] h-screen flex flex-col bg-[#000000] p-6 overflow-y-auto custom-scrollbar">
             <div className="flex items-center gap-3 mb-10">
                 <div className="p-2 bg-blue-500/10 rounded-lg">
                     <Database className="text-blue-400 w-6 h-6" />
@@ -57,17 +44,6 @@ export const Sidebar: React.FC = () => {
             </div>
 
             <div className="space-y-6">
-                <div>
-                    <h2 className="text-xs font-semibold text-white/40 uppercase tracking-wider mb-4">Overall Status</h2>
-                    <div className={cn(
-                        "p-4 rounded-xl flex items-center gap-3 transition-colors",
-                        health?.status === 'healthy' ? "bg-green-500/5 border border-green-500/10" :
-                            health?.status === 'warning' ? "bg-yellow-500/5 border border-yellow-500/10" : "bg-red-500/5 border border-red-500/10"
-                    )}>
-                        {getStatusIcon(health?.status || 'unknown')}
-                        <span className="font-medium capitalize">{health?.status || 'Connecting...'}</span>
-                    </div>
-                </div>
 
                 <div>
                     <h2 className="text-xs font-semibold text-white/40 uppercase tracking-wider mb-4">Core Metrics</h2>
