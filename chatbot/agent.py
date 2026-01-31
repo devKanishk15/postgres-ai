@@ -13,6 +13,7 @@ import re
 from config import get_settings
 from tools import PrometheusClient, ToolExecutor, TOOL_DEFINITIONS
 from promql_builder import PromQLBuilder
+from history_manager import HistoryManager
 
 
 class TimeRangeParser:
@@ -150,25 +151,21 @@ class PostgresDebugAgent:
 specializing in PostgreSQL performance analysis and incident root cause analysis.
 
 Your role is to:
-1. **SCAN**: Analyze database and system metrics to identify anomalies (CPU spikes, connection exhaustion, lock waits, etc.)
-2. **CORRELATE**: Find relationships between different metrics to understand the root cause. You have access to both PostgreSQL-specific metrics (via postgres_exporter) and host/system-level metrics (via node_exporter).
-3. **PROPOSE**: Recommend specific DBA-level fixes (e.g., "Run VACUUM on table X", "Kill blocking PID 1234", "Increase max_connections")
+1. **SCAN**: Analyze database and system metrics to identify anomalies.
+2. **CORRELATE**: Find relationships between metrics. Use both PostgreSQL and host-level metrics.
+3. **PROPOSE**: Recommend specific DBA-level fixes.
 
-You have access to tools that query Prometheus metrics from a PostgreSQL database and its underlying host infrastructure.
+**EFFICIENCY RULES**:
+- **BATCHING**: If you need multiple metrics, query them in a single tool call if the tool supports it, or sequential calls before summarizing.
+- **SPEED**: Be concise. Focus on the most likely root causes first.
+- **SYSTEM METRICS**: You have access to `cpu_utilization`, `cpu_load1`, `memory_utilization`, etc. Use them early to rule out resource saturation.
 
-**IMPORTANT**: You HAVE access to system metrics like `cpu_utilization`, `cpu_load1`, `memory_utilization`, etc. through `node_exporter`. These are ALREADY INTEGRATED. If a user asks for health, CPU, or load, you MUST use the provided tools to query these metrics. DO NOT tell the user you don't have them.
+When analyzing:
+1. Identify the time range.
+2. Query relevant metrics.
+3. Generate a clear report with actionable recommendations.
 
-When analyzing an incident:
-1. First, understand the time range the user is asking about
-2. Query relevant metrics for that time period. Don't hesitate to check system metrics (CPU, Memory, Load, Disk IO) if database issues might be caused by resource saturation.
-3. Analyze for anomalies and correlations
-4. Generate a clear incident report with actionable recommendations
-
-Always be specific in your recommendations. Instead of "optimize queries", say "Add an index on orders(customer_id)" or "The query on line X is doing a sequential scan, consider..."
-
-Available metrics include: connection counts, transaction rates, lock statistics, buffer cache hit ratios, disk I/O, CPU utilization, system load, memory usage, and more.
-
-When you have completed your analysis, use the generate_incident_report tool to create a structured report."""
+Always be specific."""
 
     def __init__(self):
         settings = get_settings()
@@ -180,17 +177,23 @@ When you have completed your analysis, use the generate_incident_report tool to 
         self.prometheus = PrometheusClient(settings.prometheus_url)
         self.tool_executor = ToolExecutor(self.prometheus)
         self.time_parser = TimeRangeParser()
-        self.conversation_history = []
+        self.history_manager = HistoryManager(storage_dir="../enhancements/conversations")
     
-    async def analyze(self, user_message: str) -> dict[str, Any]:
+    async def analyze(self, user_message: str, conversation_id: Optional[str] = None) -> dict[str, Any]:
         """
         Main entry point for analysis.
         Implements the SCAN -> CORRELATE -> PROPOSE reasoning loop.
         """
-        # Reset conversation for new analysis
-        self.conversation_history = [
-            {"role": "system", "content": self.SYSTEM_PROMPT}
-        ]
+        if conversation_id:
+            self.conversation_history = self.history_manager.get_history(conversation_id)
+        else:
+            self.conversation_history = []
+        
+        # If history is empty, initialize with system prompt
+        if not self.conversation_history:
+            self.conversation_history = [
+                {"role": "system", "content": self.SYSTEM_PROMPT}
+            ]
         
         # Add context about current time for time parsing
         current_time = datetime.now()
@@ -202,7 +205,7 @@ When you have completed your analysis, use the generate_incident_report tool to 
         })
         
         # Run the reasoning loop
-        max_iterations = 10
+        max_iterations = 6
         iteration = 0
         final_response = None
         tool_calls_made = []
@@ -255,18 +258,28 @@ When you have completed your analysis, use the generate_incident_report tool to 
                     "result_summary": self._summarize_result(result)
                 })
                 
-                # Add tool result to conversation
                 self.conversation_history.append({
                     "role": "tool",
                     "tool_call_id": tool_call.id,
                     "content": json.dumps(result)
                 })
         
+        # Save history if conversation_id is provided
+        if conversation_id:
+            # Add final response if available
+            if final_response:
+                self.conversation_history.append({
+                    "role": "assistant",
+                    "content": final_response
+                })
+            self.history_manager.save_history(conversation_id, self.conversation_history)
+        
         return {
             "analysis": final_response,
             "iterations": iteration,
             "tool_calls": tool_calls_made,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
+            "conversation_id": conversation_id
         }
     
     def _summarize_result(self, result: dict[str, Any]) -> str:

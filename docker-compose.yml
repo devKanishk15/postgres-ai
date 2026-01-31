@@ -138,6 +138,20 @@ services:
       - monitoring
     restart: unless-stopped
 
+  # Frontend Chat Interface
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: postgres-frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - chatbot
+    networks:
+      - monitoring
+    restart: unless-stopped
+
 volumes:
   postgres_data:
   prometheus_data:

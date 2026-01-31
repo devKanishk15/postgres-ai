@@ -5,6 +5,8 @@ These functions are exposed to the OpenAI function calling API.
 import httpx
 from typing import Optional, Any
 from datetime import datetime
+from cachetools import TTLCache
+import asyncio
 from promql_builder import PromQLBuilder, MetricQuery
 
 
@@ -14,15 +16,22 @@ class PrometheusClient:
     def __init__(self, base_url: str):
         self.base_url = base_url.rstrip("/")
         self.client = httpx.AsyncClient(timeout=30.0)
+        self.cache = TTLCache(maxsize=100, ttl=30)  # Cache for 30 seconds
     
     async def query_instant(self, query: str) -> dict[str, Any]:
         """Execute an instant query against Prometheus."""
+        cache_key = f"instant:{query}"
+        if cache_key in self.cache:
+            return self.cache[cache_key]
+            
         url = f"{self.base_url}/api/v1/query"
         params = {"query": query}
         
         response = await self.client.get(url, params=params)
         response.raise_for_status()
-        return response.json()
+        result = response.json()
+        self.cache[cache_key] = result
+        return result
     
     async def query_range(
         self, 
@@ -32,6 +41,10 @@ class PrometheusClient:
         step: str = "1m"
     ) -> dict[str, Any]:
         """Execute a range query against Prometheus."""
+        cache_key = f"range:{query}:{start}:{end}:{step}"
+        if cache_key in self.cache:
+            return self.cache[cache_key]
+            
         url = f"{self.base_url}/api/v1/query_range"
         params = {
             "query": query,
@@ -42,7 +55,9 @@ class PrometheusClient:
         
         response = await self.client.get(url, params=params)
         response.raise_for_status()
-        return response.json()
+        result = response.json()
+        self.cache[cache_key] = result
+        return result
     
     async def check_health(self) -> bool:
         """Check if Prometheus is healthy."""

@@ -53,7 +53,7 @@ class PromQLBuilder:
         ),
         "connection_utilization": MetricQuery(
             name="Connection Utilization",
-            query="(sum(pg_stat_activity_count) / pg_settings_max_connections) * 100",
+            query="(sum(pg_stat_activity_count) / on() group_left() sum(pg_settings_max_connections)) * 100",
             description="Percentage of max connections in use",
             unit="percent",
             threshold_warning=80,
@@ -75,7 +75,7 @@ class PromQLBuilder:
         ),
         "transaction_wraparound": MetricQuery(
             name="Transaction Wraparound Age",
-            query="pg_database_wraparound_age_datfrozenxid_age",
+            query="pg_database_wraparound_age",
             description="Age of oldest unfrozen transaction ID",
             unit="transactions",
             threshold_warning=500000000,
@@ -253,13 +253,13 @@ class PromQLBuilder:
         ),
         "sequential_scans": MetricQuery(
             name="Sequential Scans",
-            query="rate(pg_stat_user_tables_seq_scan{datname='testdb'}[5m])",
+            query="sum(rate(pg_stat_user_tables_seq_scan{datname='testdb'}[5m]))",
             description="Rate of sequential scans per second",
             unit="scans/s"
         ),
         "index_scans": MetricQuery(
             name="Index Scans",
-            query="rate(pg_stat_user_tables_idx_scan{datname='testdb'}[5m])",
+            query="sum(rate(pg_stat_user_tables_idx_scan{datname='testdb'}[5m]))",
             description="Rate of index scans per second",
             unit="scans/s"
         ),

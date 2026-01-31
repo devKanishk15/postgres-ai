@@ -144,94 +144,57 @@ docker exec -it postgres-chatbot python /scripts/simulate_lock_contention.py --m
 docker exec -it postgres-chatbot python /scripts/simulate_lock_contention.py --mode contention --waiters 10
 ```
 
+## 💻 Frontend UI
+
+The project now includes a modern React-based chatbot interface for easier interaction and real-time monitoring.
+
+### 1. Setup and Run (Docker)
+
+```bash
+docker compose up -d
+```
+
+The UI will be available at [http://localhost:5173](http://localhost:5173).
+
+### 2. Development Setup (Local)
+
+If you wish to run the frontend locally for development:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+### 2. Key Features
+
+- **Real-time Health Sidebar**: Monitor CPU, Memory, Connections, and Transactions at a glance.
+- **Rich AI Chat**: Interact with the AI agent using natural language with full Markdown support for analysis reports.
+- **Tool Visualization**: See which metrics the AI is inspecting in real-time.
+- **System Health Status**: Visual indicators (Green/Yellow/Red) for database and infrastructure health.
+
+---
+
 ## 💬 Example Queries
-
-The chatbot understands natural language queries about database performance:
-
-```
-"What happened to the database yesterday between 10 AM and 11 AM?"
-"Analyze the last 2 hours for performance issues"
-"Why is the database slow right now?"
-"Check for lock contention issues"
-"Is transaction wraparound a concern?"
-"Show me the buffer cache hit ratio trends"
-"What's causing high disk I/O?"
-"Generate a health report for the last 30 minutes"
-```
-
-## 📈 Monitored Metrics
-
-| Category | Metrics |
-|----------|---------|
-| **Connections** | Active, Idle, Total, Utilization % |
-| **Transactions** | Commits/s, Rollbacks/s, Wraparound Age |
-| **Locks** | Total, Exclusive, Waiting |
-| **Buffer Cache** | Hit Ratio, Blocks Read, Blocks Hit |
-| **Disk I/O** | Backend Writes, Checkpoints, Write Time |
-| **Tuples** | Inserted/s, Updated/s, Deleted/s, Dead Tuples |
-| **Replication** | Lag (seconds) |
-| **System (Node)** | CPU Load (1/5/15m), CPU Utilization, Memory Usage, I/O Wait |
-
-## 🛠️ Development
-
-### Run Chatbot Locally (without Docker)
-
-```bash
-cd chatbot
-pip install -r requirements.txt
-
-# Set environment variables
-export OPENAI_API_KEY="your-key"
-export PROMETHEUS_URL="http://localhost:9090"
-
-# Run the app
-uvicorn main:app --reload --port 8000
-```
-
-### View Logs
-
-```bash
-# All services
-docker compose logs -f
-
-# Just chatbot
-docker compose logs -f chatbot
-
-# Just postgres
-docker compose logs -f postgres
-```
-
-### Access Prometheus UI
-
-Open http://localhost:9090 to:
-- Query metrics directly
-- View scrape targets
-- Check alert rules
-
+...
 ## 📁 Project Structure
 
 ```
 postgres-ai/
 ├── docker-compose.yml          # Container orchestration
 ├── .env                        # Environment variables
+├── frontend/                   # [NEW] React + TS Chat Interface
+│   ├── src/
+│   │   ├── components/         # Chat and Sidebar components
+│   │   ├── api.ts              # Backend API client
+│   │   └── App.tsx             # Main layout
+│   └── tailwind.config.js      # Styling configuration
 ├── prometheus/
 │   └── prometheus.yml          # Prometheus configuration
 ├── chatbot/
 │   ├── Dockerfile              # Chatbot container image
 │   ├── requirements.txt        # Python dependencies
-│   ├── main.py                 # FastAPI application
-│   ├── agent.py                # AI reasoning loop
-│   ├── tools.py                # Function calling tools
-│   ├── promql_builder.py       # PromQL query templates
-│   └── config.py               # Configuration settings
-├── scripts/
-│   ├── init.sql                # Database initialization
-│   ├── simulate_connection_exhaustion.sh
-│   ├── simulate_high_io.sql
-│   ├── simulate_lock_contention.py
-│   └── stress_test.sh          # pgbench wrapper
-└── docs/
-    └── sample_health_report.md # Example AI-generated report
+...
 ```
 
 ## 🔧 Configuration

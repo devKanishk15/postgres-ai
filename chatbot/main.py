@@ -3,6 +3,7 @@ FastAPI application for the PostgreSQL Debugging Chatbot.
 """
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from pydantic import BaseModel
 from typing import Optional
 from contextlib import asynccontextmanager
@@ -15,6 +16,7 @@ from config import get_settings
 class ChatRequest(BaseModel):
     """Chat request from user."""
     message: str
+    conversation_id: Optional[str] = None
     
 
 class ChatResponse(BaseModel):
@@ -23,6 +25,7 @@ class ChatResponse(BaseModel):
     iterations: int
     tool_calls: list
     timestamp: str
+    conversation_id: Optional[str] = None
 
 
 class HealthResponse(BaseModel):
@@ -77,6 +80,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 
 @app.get("/")
@@ -140,12 +145,13 @@ async def chat(request: ChatRequest):
         raise HTTPException(status_code=400, detail="Message cannot be empty")
     
     try:
-        result = await agent.analyze(request.message)
+        result = await agent.analyze(request.message, conversation_id=request.conversation_id)
         return ChatResponse(
             analysis=result.get("analysis"),
             iterations=result.get("iterations", 0),
             tool_calls=result.get("tool_calls", []),
-            timestamp=result.get("timestamp", "")
+            timestamp=result.get("timestamp", ""),
+            conversation_id=result.get("conversation_id")
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")

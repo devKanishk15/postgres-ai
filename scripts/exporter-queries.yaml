@@ -61,3 +61,13 @@ pg_stat_user_tables:
     - total_size_bytes:
         usage: "GAUGE"
         description: "Total disk space used by the table, including all indexes and TOAST data"
+pg_database_wraparound:
+  query: "SELECT datname, age(datfrozenxid) as age FROM pg_database;"
+  master: true
+  metrics:
+    - datname:
+        usage: "LABEL"
+        description: "Database name"
+    - age:
+        usage: "GAUGE"
+        description: "Age of oldest unfrozen transaction ID"
