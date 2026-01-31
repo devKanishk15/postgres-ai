@@ -193,6 +193,96 @@ class PromQLBuilder:
             description="Size of the database in bytes",
             unit="bytes"
         ),
+        
+        # System Metrics (Node Exporter)
+        "cpu_load1": MetricQuery(
+            name="CPU Load (1m)",
+            query="node_load1",
+            description="System load average over the last 1 minute",
+            unit="load"
+        ),
+        "cpu_load5": MetricQuery(
+            name="CPU Load (5m)",
+            query="node_load5",
+            description="System load average over the last 5 minutes",
+            unit="load"
+        ),
+        "cpu_load15": MetricQuery(
+            name="CPU Load (15m)",
+            query="node_load15",
+            description="System load average over the last 15 minutes",
+            unit="load"
+        ),
+        "cpu_utilization": MetricQuery(
+            name="CPU Utilization",
+            query="100 - (avg by(instance)(irate(node_cpu_seconds_total{mode='idle'}[5m])) * 100)",
+            description="Total CPU utilization percentage",
+            unit="percent",
+            threshold_warning=70,
+            threshold_critical=90
+        ),
+        "cpu_utilization_user": MetricQuery(
+            name="CPU Utilization (User)",
+            query="avg by(instance)(irate(node_cpu_seconds_total{mode='user'}[5m])) * 100",
+            description="CPU time spent in user mode",
+            unit="percent"
+        ),
+        "cpu_utilization_iowait": MetricQuery(
+            name="CPU Utilization (I/O Wait)",
+            query="avg by(instance)(irate(node_cpu_seconds_total{mode='iowait'}[5m])) * 100",
+            description="CPU time spent waiting for I/O",
+            unit="percent",
+            threshold_warning=10,
+            threshold_critical=25
+        ),
+        "memory_utilization": MetricQuery(
+            name="Memory Utilization",
+            query="((node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes) * 100",
+            description="Percentage of system memory in use",
+            unit="percent",
+            threshold_warning=80,
+            threshold_critical=95
+        ),
+        
+        # Table & Index Metrics
+        "table_size": MetricQuery(
+            name="Table Size",
+            query="pg_stat_user_tables_total_size_bytes{datname='testdb'}",
+            description="Total size of table including indexes",
+            unit="bytes"
+        ),
+        "sequential_scans": MetricQuery(
+            name="Sequential Scans",
+            query="rate(pg_stat_user_tables_seq_scan{datname='testdb'}[5m])",
+            description="Rate of sequential scans per second",
+            unit="scans/s"
+        ),
+        "index_scans": MetricQuery(
+            name="Index Scans",
+            query="rate(pg_stat_user_tables_idx_scan{datname='testdb'}[5m])",
+            description="Rate of index scans per second",
+            unit="scans/s"
+        ),
+        
+        # Query Performance (requires pg_stat_statements)
+        "query_execution_time": MetricQuery(
+            name="Query Execution Time",
+            query="rate(pg_stat_statements_total_time_seconds{datname='testdb'}[5m])",
+            description="Total time spent executing queries",
+            unit="seconds/s"
+        ),
+        "query_calls": MetricQuery(
+            name="Query Calls",
+            query="rate(pg_stat_statements_calls{datname='testdb'}[5m])",
+            description="Rate of query executions",
+            unit="calls/s"
+        ),
+        "query_mean_time": MetricQuery(
+            name="Mean Query Time",
+            query="sum(rate(pg_stat_statements_total_time_seconds{datname='testdb'}[5m])) / sum(rate(pg_stat_statements_calls{datname='testdb'}[5m]))",
+            description="Average time per query execution",
+            unit="seconds"
+        ),
     }
     
     @classmethod
@@ -230,7 +320,10 @@ class PromQLBuilder:
             "transaction_wraparound",
             "waiting_locks",
             "backend_writes",
-            "dead_tuples"
+            "dead_tuples",
+            "cpu_utilization",
+            "memory_utilization",
+            "cpu_load1"
         ]
     
     @classmethod
@@ -250,5 +343,13 @@ class PromQLBuilder:
             "backend_writes",
             "rows_inserted",
             "rows_updated",
-            "dead_tuples"
+            "dead_tuples",
+            "cpu_utilization",
+            "cpu_utilization_iowait",
+            "memory_utilization",
+            "cpu_load1",
+            "table_size",
+            "sequential_scans",
+            "index_scans",
+            "query_mean_time"
         ]

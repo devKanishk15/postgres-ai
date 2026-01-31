@@ -9,21 +9,26 @@ An AI-powered chatbot for PostgreSQL performance analysis and incident Root Caus
 │                        Docker Environment                            │
 ├─────────────────────────────────────────────────────────────────────┤
 │                                                                      │
-│  ┌──────────────┐     ┌──────────────────┐     ┌──────────────────┐ │
-│  │  PostgreSQL  │────▶│ postgres_exporter│────▶│    Prometheus    │ │
-│  │   :5432      │     │      :9187       │     │      :9090       │ │
-│  └──────────────┘     └──────────────────┘     └────────┬─────────┘ │
-│                                                          │          │
-│                                                          ▼          │
-│  ┌──────────────────────────────────────────────────────────────┐  │
-│  │                    Chatbot API (:8000)                        │  │
-│  │  ┌────────────────────────────────────────────────────────┐  │  │
-│  │  │              AI Reasoning Loop                          │  │  │
-│  │  │   SCAN ──▶ CORRELATE ──▶ PROPOSE                       │  │  │
-│  │  │   (Anomaly   (Root        (DBA-Level                   │  │  │
-│  │  │   Detection)  Cause)       Fix)                        │  │  │
-│  │  └────────────────────────────────────────────────────────┘  │  │
-│  └──────────────────────────────────────────────────────────────┘  │
+│  ┌──────────────┐     ┌──────────────────┐                           │
+│  │  PostgreSQL  │────▶│ postgres_exporter│───────┐                   │
+│  │   :5432      │     │      :9187       │       │                   │
+│  └──────────────┘     └──────────────────┘       │                   │
+│                                                  ▼                   │
+│  ┌──────────────┐     ┌──────────────────┐     ┌──────────────────┐  │
+│  │  Host System │────▶│  node_exporter   │────▶│    Prometheus    │  │
+│  │  (CPU/Mem)   │     │      :9100       │     │      :9090       │  │
+│  └──────────────┘     └──────────────────┘     └────────┬─────────┘  │
+│                                                          │           │
+│                                                          ▼           │
+│  ┌──────────────────────────────────────────────────────────────┐   │
+│  │                    Chatbot API (:8000)                        │   │
+│  │  ┌────────────────────────────────────────────────────────┐  │   │
+│  │  │              AI Reasoning Loop                          │  │   │
+│  │  │   SCAN ──▶ CORRELATE ──▶ PROPOSE                       │  │   │
+│  │  │   (Anomaly   (Root        (DBA-Level                   │  │   │
+│  │  │   Detection)  Cause)       Fix)                        │  │   │
+│  │  └────────────────────────────────────────────────────────┘  │   │
+│  └──────────────────────────────────────────────────────────────┘   │
 │                                                                      │
 └─────────────────────────────────────────────────────────────────────┘
 ```
@@ -67,19 +72,13 @@ curl http://localhost:8000/health
 
 ```bash
 # Ask about database health
-curl -X POST http://localhost:8000/chat \
-  -H "Content-Type: application/json" \
-  -d '{"message": "How is the database performing right now?"}'
+curl -X POST http://localhost:8000/chat -H "Content-Type: application/json" -d '{"message": "How is the database performing right now?"}'
 
 # Analyze a specific time range
-curl -X POST http://localhost:8000/chat \
-  -H "Content-Type: application/json" \
-  -d '{"message": "What happened to the database in the last 30 minutes?"}'
+curl -X POST http://localhost:8000/chat -H "Content-Type: application/json" -d '{"message": "What happened to the database in the last 30 minutes?"}'
 
 # Investigate a specific issue
-curl -X POST http://localhost:8000/chat \
-  -H "Content-Type: application/json" \
-  -d '{"message": "Check for connection exhaustion issues"}'
+curl -X POST http://localhost:8000/chat -H "Content-Type: application/json" -d '{"message": "Check for connection exhaustion issues"}'
 ```
 
 ## 📊 API Endpoints
@@ -99,7 +98,7 @@ curl -X POST http://localhost:8000/chat \
 
 ```bash
 # Simulate 80 connections (80% of max)
-./scripts/simulate_connection_exhaustion.sh 80
+docker exec -it postgres-db /scripts/simulate_connection_exhaustion.sh 80
 
 # Then ask the chatbot to analyze
 curl -X POST http://localhost:8000/chat \
@@ -123,26 +122,26 @@ curl -X POST http://localhost:8000/chat \
 
 ```bash
 # Initialize pgbench tables
-./scripts/stress_test.sh init
+docker exec -it postgres-db /scripts/stress_test.sh init
 
 # Run medium load test
-./scripts/stress_test.sh medium
+docker exec -it postgres-db /scripts/stress_test.sh medium
 
 # Run spike pattern
-./scripts/stress_test.sh spike
+docker exec -it postgres-db /scripts/stress_test.sh spike
 ```
 
 ### Lock Contention
 
 ```bash
 # Simulate deadlock
-python scripts/simulate_lock_contention.py --mode deadlock
+docker exec -it postgres-chatbot python /scripts/simulate_lock_contention.py --mode deadlock
 
 # Simulate long-running locks
-python scripts/simulate_lock_contention.py --mode long_lock --hold-time 120
+docker exec -it postgres-chatbot python /scripts/simulate_lock_contention.py --mode long_lock --hold-time 120
 
 # Simulate contention with waiting sessions
-python scripts/simulate_lock_contention.py --mode contention --waiters 10
+docker exec -it postgres-chatbot python /scripts/simulate_lock_contention.py --mode contention --waiters 10
 ```
 
 ## 💬 Example Queries
@@ -171,6 +170,7 @@ The chatbot understands natural language queries about database performance:
 | **Disk I/O** | Backend Writes, Checkpoints, Write Time |
 | **Tuples** | Inserted/s, Updated/s, Deleted/s, Dead Tuples |
 | **Replication** | Lag (seconds) |
+| **System (Node)** | CPU Load (1/5/15m), CPU Utilization, Memory Usage, I/O Wait |
 
 ## 🛠️ Development
 

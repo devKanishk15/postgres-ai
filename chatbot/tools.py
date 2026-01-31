@@ -63,7 +63,7 @@ TOOL_DEFINITIONS = [
         "type": "function",
         "function": {
             "name": "query_prometheus_metric",
-            "description": "Query a specific PostgreSQL metric from Prometheus for a given time range. Use this to fetch time-series data for analysis.",
+            "description": "Query a specific PostgreSQL or system/host metric from Prometheus for a given time range. Use this to fetch time-series data for analysis.",
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -94,7 +94,7 @@ TOOL_DEFINITIONS = [
         "type": "function",
         "function": {
             "name": "get_current_metric_value",
-            "description": "Get the current (latest) value of a PostgreSQL metric.",
+            "description": "Get the current (latest) value of a PostgreSQL or system/host metric.",
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -197,7 +197,7 @@ TOOL_DEFINITIONS = [
         "type": "function",
         "function": {
             "name": "list_available_metrics",
-            "description": "List all available PostgreSQL metrics that can be queried.",
+            "description": "List all available PostgreSQL and system/host metrics that can be queried.",
             "parameters": {
                 "type": "object",
                 "properties": {},

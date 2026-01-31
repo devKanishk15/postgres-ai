@@ -154,7 +154,7 @@ def waiting_sessions(dsn: str, row_ids: list, num_waiters: int):
 
 def main():
     parser = argparse.ArgumentParser(description="Simulate lock contention scenarios")
-    parser.add_argument("--host", default="localhost", help="PostgreSQL host")
+    parser.add_argument("--host", default="postgres", help="PostgreSQL host")
     parser.add_argument("--port", default=5432, type=int, help="PostgreSQL port")
     parser.add_argument("--user", default="postgres", help="PostgreSQL user")
     parser.add_argument("--password", default="postgres", help="PostgreSQL password")

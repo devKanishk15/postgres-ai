@@ -1,0 +1,63 @@
+pg_stat_statements:
+  query: "SELECT d.datname, userid, dbid, queryid, query, calls, total_exec_time / 1000 as total_time_seconds, rows FROM pg_stat_statements JOIN pg_database d ON d.oid = dbid;"
+  master: true
+  metrics:
+    - datname:
+        usage: "LABEL"
+        description: "Database name"
+    - userid:
+        usage: "LABEL"
+        description: "User ID"
+    - dbid:
+        usage: "LABEL"
+        description: "Database ID"
+    - queryid:
+        usage: "LABEL"
+        description: "Query ID"
+    - query:
+        usage: "LABEL"
+        description: "The query text"
+    - calls:
+        usage: "COUNTER"
+        description: "Total number of times the statement was executed"
+    - total_time_seconds:
+        usage: "COUNTER"
+        description: "Total time spent in the statement, in seconds"
+    - rows:
+        usage: "COUNTER"
+        description: "Total number of rows retrieved or affected by the statement"
+
+pg_stat_user_tables:
+  query: "SELECT datname, schemaname, relname, seq_scan, idx_scan, n_tup_ins, n_tup_upd, n_tup_del, n_dead_tup, pg_total_relation_size(relid) as total_size_bytes FROM pg_stat_user_tables JOIN pg_database ON datname = current_database();"
+  master: true
+  metrics:
+    - datname:
+        usage: "LABEL"
+        description: "Database name"
+    - schemaname:
+        usage: "LABEL"
+        description: "Schema name"
+    - relname:
+        usage: "LABEL"
+        description: "Table name"
+    - seq_scan:
+        usage: "COUNTER"
+        description: "Number of sequential scans initiated on this table"
+    - idx_scan:
+        usage: "COUNTER"
+        description: "Number of index scans initiated on this table"
+    - n_tup_ins:
+        usage: "COUNTER"
+        description: "Number of rows inserted"
+    - n_tup_upd:
+        usage: "COUNTER"
+        description: "Number of rows updated"
+    - n_tup_del:
+        usage: "COUNTER"
+        description: "Number of rows deleted"
+    - n_dead_tup:
+        usage: "GAUGE"
+        description: "Estimated number of dead rows"
+    - total_size_bytes:
+        usage: "GAUGE"
+        description: "Total disk space used by the table, including all indexes and TOAST data"

@@ -35,6 +35,17 @@ echo "Mode: $MODE"
 echo "=============================================="
 echo ""
 
+# Check if pgbench tables exist (unless we are in init mode)
+if [ "$MODE" != "init" ]; then
+    TABLE_EXISTS=$(psql -h "$PGHOST" -p "$PGPORT" -U "$PGUSER" -d "$PGDATABASE" -tAc "SELECT 1 FROM pg_tables WHERE tablename = 'pgbench_accounts'")
+    if [ "$TABLE_EXISTS" != "1" ]; then
+        echo "[$(date '+%Y-%m-%d %H:%M:%S')] pgbench tables not found. Initializing..."
+        pgbench -h "$PGHOST" -p "$PGPORT" -U "$PGUSER" -d "$PGDATABASE" -i -s 10
+        echo "[$(date '+%Y-%m-%d %H:%M:%S')] Initialization complete."
+        echo ""
+    fi
+fi
+
 case $MODE in
     init)
         echo "[$(date '+%Y-%m-%d %H:%M:%S')] Initializing pgbench tables..."

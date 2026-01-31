@@ -26,12 +26,13 @@ SELECT 'Created stress test table' AS status;
 
 -- Insert large amounts of data
 INSERT INTO io_stress_test (data, payload)
-SELECT 
-    md5(random()::text) || md5(random()::text) || md5(random()::text),
-    gen_random_bytes(1024)  -- 1KB of random bytes per row
-FROM generate_series(1, 100000);
+SELECT
+    md5(g::text),
+    repeat('x', 1024)::bytea
+FROM generate_series(1, 1000000) g;
 
-SELECT 'Inserted 100,000 rows with random data' AS status;
+
+SELECT 'Inserted 100,0000 rows with random data' AS status;
 
 -- -----------------------------------------------------------------------------
 -- 2. Force a checkpoint to write all dirty buffers to disk
